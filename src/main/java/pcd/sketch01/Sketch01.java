@@ -13,7 +13,7 @@ public class Sketch01 {
 		 * - large: 400 small balls
 		 * - massive: 4500 small balls 
 		 */
-		
+		System.setProperty("sun.java2d.opengl", "true");
 		var boardConf = new MinimalBoardConf();
 		// var boardConf = new LargeBoardConf();
 		// var boardConf = new MassiveBoardConf();
