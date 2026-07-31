@@ -12,47 +12,39 @@ import java.util.List;
 
 public class ThreadsBallUpdater implements BoardUpdater {
 
+    private final GameBalls gameBalls;
+    private final Boundary bounds;
     private final int nThreads;
     private final List<CollisionAgent> collisionAgents;
-    private final CyclicBarrier updateBarrier;
+    private final CyclicBarrier collisionBarrier;
 
-    public ThreadsBallUpdater(List<Ball> initialBalls, int nThreads) {
-        var ballAllocator = new BallAllocator(initialBalls);
+    public ThreadsBallUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
+        this.gameBalls = gameBalls;
+        this.bounds = bounds;
+        var ballAllocator = new BallAllocator(gameBalls.getAllBalls());
         this.nThreads = nThreads;
         collisionAgents = new ArrayList<>(nThreads);
-        updateBarrier = new CyclicBarrier(nThreads + 1);
+        var updateBarrier = new CyclicBarrier(nThreads);
+        collisionBarrier = new CyclicBarrier(nThreads + 1);
         for (int i = 0; i < nThreads; i++) {
-            var agent = new CollisionAgent(ballAllocator, updateBarrier);
+            var agent = new CollisionAgent(gameBalls, ballAllocator, updateBarrier, collisionBarrier);
             collisionAgents.add(agent);
             agent.start();
         }
     }
 
     @Override
-    public void updateStates(GameBalls gameBalls, Boundary bounds, long elapsedTime) {
+    public void updateBoard(long elapsedTime) {
         gameBalls.playerBall().updateState(elapsedTime, bounds);
         gameBalls.cpuBall().updateState(elapsedTime, bounds);
 
-        for (var b : gameBalls.balls()) {
-            b.updateState(elapsedTime, bounds);
-        }
-    }
-
-    @Override
-    public void resolveCollisions(GameBalls gameBalls) {
-        var balls = gameBalls.balls();
         var splitBalls = gameBalls.splitSimpleBalls(nThreads);
 
         for (int i = 0; i < nThreads; i++) {
-            collisionAgents.get(i).notifyTask(new CollisionTask(splitBalls.get(i), balls));
+            collisionAgents.get(i).notifyTask(new Task(splitBalls.get(i), bounds, elapsedTime));
         }
 
-        updateBarrier.await();
-
-        for (var b : balls) {
-            Ball.resolveCollision(gameBalls.playerBall(), b);
-            Ball.resolveCollision(gameBalls.cpuBall(), b);
-        }
+        collisionBarrier.await();
 
         Ball.resolveCollision(gameBalls.playerBall(), gameBalls.cpuBall());
     }

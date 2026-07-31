@@ -27,7 +27,7 @@ public class Board {
     }
 
     public void updateState(long dt, BoardUpdater boardUpdater) {
-        boardUpdater.updateStates(gameBalls, bounds, dt);
+        boardUpdater.updateBoard(dt);
 
         Iterator<Ball> iterator = gameBalls.balls().iterator();
         while (iterator.hasNext()) {
@@ -56,8 +56,6 @@ public class Board {
                 return;
             }
         }
-
-        boardUpdater.resolveCollisions(gameBalls);
     }
 
 
