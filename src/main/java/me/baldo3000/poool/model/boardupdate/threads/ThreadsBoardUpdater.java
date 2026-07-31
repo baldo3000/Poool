@@ -10,7 +10,7 @@ import me.baldo3000.poool.model.utils.GameBalls;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ThreadsBallUpdater implements BoardUpdater {
+public class ThreadsBoardUpdater implements BoardUpdater {
 
     private final GameBalls gameBalls;
     private final Boundary bounds;
@@ -18,7 +18,7 @@ public class ThreadsBallUpdater implements BoardUpdater {
     private final List<Agent> agents;
     private final CyclicBarrier collisionBarrier;
 
-    public ThreadsBallUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
+    public ThreadsBoardUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
         this.gameBalls = gameBalls;
         this.bounds = bounds;
         var ballAllocator = new BallAllocator(gameBalls.getAllBalls());

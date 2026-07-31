@@ -3,8 +3,7 @@ package me.baldo3000.poool;
 import me.baldo3000.poool.controller.Controller;
 import me.baldo3000.poool.controller.CpuAgent;
 import me.baldo3000.poool.model.Board;
-import me.baldo3000.poool.model.boardupdate.sequential.SequentialBoardUpdater;
-import me.baldo3000.poool.model.boardupdate.threads.ThreadsBallUpdater;
+import me.baldo3000.poool.model.boardupdate.threads.ThreadsBoardUpdater;
 import me.baldo3000.poool.model.config.MassiveBoardConf;
 
 public class Main {
@@ -15,7 +14,7 @@ public class Main {
         //var board = new Board(new LargeBoardConf());
         var board = new Board(new MassiveBoardConf());
         //var controller = new Controller(board, new SequentialBoardUpdater(board.getGameBalls(), board.getBounds()));
-        var controller = new Controller(board, new ThreadsBallUpdater(board.getGameBalls(), board.getBounds(), nThreads));
+        var controller = new Controller(board, new ThreadsBoardUpdater(board.getGameBalls(), board.getBounds(), nThreads));
         var cpuAgent = new CpuAgent(controller);
         cpuAgent.start();
         controller.start();
