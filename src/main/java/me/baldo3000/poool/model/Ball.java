@@ -1,6 +1,5 @@
 package me.baldo3000.poool.model;
 
-import me.baldo3000.poool.model.utils.BallType;
 import me.baldo3000.poool.model.utils.Boundary;
 import me.baldo3000.poool.model.utils.P2d;
 import me.baldo3000.poool.model.utils.V2d;
@@ -12,20 +11,22 @@ public class Ball {
     private final double radius;
     private final double mass;
     private final BallType type;
+    private final int id;
     private BallType hitter = BallType.BALL;
 
     private static double FRICTION_FACTOR = 0.25;    /* 0 minimum */
     private static double RESTITUTION_FACTOR = 1;
 
-    public Ball(P2d pos, double radius, double mass, V2d vel, BallType type) {
+    public Ball(P2d pos, double radius, double mass, V2d vel, BallType type, int id) {
         this.pos = pos;
         this.radius = radius;
         this.mass = mass;
         this.vel = vel;
         this.type = type;
+        this.id = id;
     }
 
-    public void updateState(long dt, Board ctx) {
+    public void updateState(long dt, Boundary bounds) {
         double speed = vel.abs();
         double dt_scaled = dt * 0.001;
         if (speed > 0.001) {
@@ -36,7 +37,7 @@ public class Ball {
             vel = new V2d(0, 0);
         }
         pos = pos.sum(vel.mul(dt_scaled));
-        applyBoundaryConstraints(ctx);
+        applyBoundaryConstraints(bounds);
     }
 
     public void kick(V2d vel, double limit) {
@@ -46,11 +47,8 @@ public class Ball {
     /**
      *
      * Keep the ball inside the boundaries, updating the velocity in the case of bounces
-     *
-     * @param ctx
      */
-    private void applyBoundaryConstraints(Board ctx) {
-        Boundary bounds = ctx.getBounds();
+    private void applyBoundaryConstraints(Boundary bounds) {
         if (pos.x() + radius > bounds.x1()) {
             pos = new P2d(bounds.x1() - radius, pos.y());
             vel = vel.getSwappedX();
@@ -64,6 +62,15 @@ public class Ball {
             pos = new P2d(pos.x(), bounds.y0() + radius);
             vel = vel.getSwappedY();
         }
+    }
+
+    public static boolean isInContact(Ball ballA, Ball ballB) {
+        final double distanceX = ballB.pos.x() - ballA.pos.x();
+        final double distanceY = ballB.pos.y() - ballA.pos.y();
+        final double centerDistance = Math.hypot(distanceX, distanceY);
+        final double contactDistance = ballA.getRadius() + ballB.getRadius();
+
+        return centerDistance < contactDistance && centerDistance > 1e-6;
     }
 
     /**
@@ -161,6 +168,10 @@ public class Ball {
 
     public BallType getType() {
         return type;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public BallType getHitter() {

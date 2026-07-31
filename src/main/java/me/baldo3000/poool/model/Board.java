@@ -1,45 +1,38 @@
 package me.baldo3000.poool.model;
 
+import me.baldo3000.poool.model.boardupdate.BoardUpdater;
 import me.baldo3000.poool.model.config.BoardConf;
 import me.baldo3000.poool.model.utils.Boundary;
+import me.baldo3000.poool.model.utils.GameBalls;
 import me.baldo3000.poool.model.utils.V2d;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class Board {
 
-    private final List<Ball> balls;
-    private final Ball playerBall;
+    private final GameBalls gameBalls;
     private final Boundary bounds;
-    private final Ball cpuBall;
-    private final List<Ball> holes;
     private int playerScore = 0;
     private int cpuScore = 0;
     private boolean playerAlive = true;
     private boolean cpuAlive = true;
 
     public Board(BoardConf conf) {
-        balls = conf.getSmallBalls();
-        playerBall = conf.getPlayerBall();
-        cpuBall = conf.getCpuBall();
         bounds = conf.getBoardBoundary();
-        holes = conf.getHoles();
+        var balls = conf.getSmallBalls();
+        var playerBall = conf.getPlayerBall();
+        var cpuBall = conf.getCpuBall();
+        var holes = conf.getHoles();
+        gameBalls = new GameBalls(playerBall, cpuBall, balls, holes);
     }
 
-    public void updateState(long dt) {
-        playerBall.updateState(dt, this);
-        cpuBall.updateState(dt, this);
+    public void updateState(long dt, BoardUpdater boardUpdater) {
+        boardUpdater.updateStates(gameBalls, bounds, dt);
 
-        for (var b : balls) {
-            b.updateState(dt, this);
-        }
-
-
-        Iterator<Ball> iterator = balls.iterator();
+        Iterator<Ball> iterator = gameBalls.balls().iterator();
         while (iterator.hasNext()) {
             Ball ball = iterator.next();
-            for (var hole : holes) {
+            for (var hole : gameBalls.holes()) {
                 if (isInHole(ball, hole)) {
                     switch (ball.getHitter()) {
                         case PLAYER -> playerScore++;
@@ -53,48 +46,23 @@ public class Board {
             }
         }
 
-        // TODO: check this condition
-        // 3. Player/CPU Hole
-        for (Ball hole : holes) {
-            if (isInHole(playerBall, hole)) {
+        for (Ball hole : gameBalls.holes()) {
+            if (isInHole(gameBalls.playerBall(), hole)) {
                 playerAlive = false;
                 return;
             }
-            if (isInHole(cpuBall, hole)) {
+            if (isInHole(gameBalls.cpuBall(), hole)) {
                 cpuAlive = false;
                 return;
             }
         }
 
-
-        for (int i = 0; i < balls.size() - 1; i++) {
-            for (int j = i + 1; j < balls.size(); j++) {
-                Ball.resolveCollision(balls.get(i), balls.get(j));
-            }
-        }
-
-        for (var b : balls) {
-            Ball.resolveCollision(playerBall, b);
-            Ball.resolveCollision(cpuBall, b);
-        }
-
-        Ball.resolveCollision(playerBall, cpuBall);
+        boardUpdater.resolveCollisions(gameBalls);
     }
 
-    public List<Ball> getBalls() {
-        return balls;
-    }
 
-    public Ball getPlayerBall() {
-        return playerBall;
-    }
-
-    public Ball getCpuBall() {
-        return cpuBall;
-    }
-
-    public List<Ball> getHoles() {
-        return holes;
+    public GameBalls getGameBalls() {
+        return gameBalls;
     }
 
     public Boundary getBounds() {
@@ -129,10 +97,10 @@ public class Board {
     }
 
     public void applyInputToPlayer(V2d impulse) {
-        this.playerBall.kick(impulse, 1.0);
+        this.gameBalls.playerBall().kick(impulse, 1.0);
     }
 
     public void applyInputToCpu(V2d impulse) {
-        this.cpuBall.kick(impulse, Double.POSITIVE_INFINITY);
+        this.gameBalls.cpuBall().kick(impulse, Double.POSITIVE_INFINITY);
     }
 }

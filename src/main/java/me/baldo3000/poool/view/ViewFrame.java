@@ -59,7 +59,6 @@ public class ViewFrame extends JFrame {
         });
     }
 
-    // TODO: check with invoke and wait
     public void render() {
         if (gameEnded) return;
         long nf = sync.nextFrameToRender();
@@ -162,7 +161,7 @@ public class ViewFrame extends JFrame {
             g2.setFont(new Font("Arial", Font.PLAIN, 12));
             g2.setColor(Color.BLACK);
             g2.drawString("Num small balls: " + model.getBalls().size(), 20, 150);
-            g2.drawString("Frame per sec: " + model.getFramePerSec(), 20, 170);
+            g2.drawString("Frame per sec: " + String.format("%.2f", model.getFramePerSec()), 20, 170);
 
             sync.notifyFrameRendered();
         }

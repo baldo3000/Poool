@@ -19,7 +19,8 @@ public class CpuAgent extends Thread {
         while (running) {
             try {
                 Thread.sleep(random.nextInt(500));
-                V2d impulse = new V2d(random.nextDouble() - 0.5, random.nextDouble() - 0.5);
+                //V2d impulse = new V2d(random.nextDouble() - 0.5, random.nextDouble() - 0.5);
+                V2d impulse = new V2d(0.0, 0.0);
                 listener.notifyCpuInput(impulse);
             } catch (InterruptedException e) {
                 running = false;

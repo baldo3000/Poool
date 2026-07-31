@@ -9,7 +9,7 @@ import me.baldo3000.poool.model.utils.V2d;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LargeBoardConf implements BoardConf {
+public class MassiveBoardConf implements BoardConf {
     private int id = 0;
 
     @Override
@@ -33,11 +33,12 @@ public class LargeBoardConf implements BoardConf {
     public List<Ball> getSmallBalls() {
         var ballRadius = 0.01;
         var balls = new ArrayList<Ball>();
+        double spacing = 0.015;
 
-        for (int row = 0; row < 20; row++) {
-            for (int col = 0; col < 20; col++) {
-                var px = -0.25 + col * 0.025;
-                var py = row * 0.025;
+        for (int row = 0; row < 45; row++) {
+            for (int col = 0; col < 100; col++) {
+                var px = -1.25 + col * spacing;
+                var py = -0.5 + row * spacing;
                 var b = new Ball(new P2d(px, py), ballRadius, 0.25, new V2d(0, 0), BallType.BALL, id++);
                 balls.add(b);
             }
