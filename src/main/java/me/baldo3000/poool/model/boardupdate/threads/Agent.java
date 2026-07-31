@@ -6,7 +6,7 @@ import me.baldo3000.poool.model.utils.CyclicBarrier;
 import me.baldo3000.poool.model.utils.GameBalls;
 import me.baldo3000.poool.model.utils.UnboundedBuffer;
 
-public class CollisionAgent extends Thread {
+public class Agent extends Thread {
     private final UnboundedBuffer<Task> taskBuffer = new UnboundedBuffer<>();
     private final GameBalls gameBalls;
     private final BallAllocator ballAllocator;
@@ -14,7 +14,7 @@ public class CollisionAgent extends Thread {
     private final CyclicBarrier updateBarrier;
     private volatile boolean running = true;
 
-    public CollisionAgent(GameBalls gameBalls, BallAllocator ballAllocator, CyclicBarrier updateBarrier, CyclicBarrier collisionBarrier) {
+    public Agent(GameBalls gameBalls, BallAllocator ballAllocator, CyclicBarrier updateBarrier, CyclicBarrier collisionBarrier) {
         this.gameBalls = gameBalls;
         this.ballAllocator = ballAllocator;
         this.collisionBarrier = collisionBarrier;
@@ -23,6 +23,9 @@ public class CollisionAgent extends Thread {
 
     @Override
     public void run() {
+        var balls = gameBalls.balls();
+        var playerBall = gameBalls.playerBall();
+        var cpuBall = gameBalls.cpuBall();
         while (running) {
             try {
                 var task = taskBuffer.get();
@@ -34,11 +37,11 @@ public class CollisionAgent extends Thread {
                 updateBarrier.await();
 
                 for (var ball1 : task.myBalls()) {
-                    for (var ball2 : gameBalls.balls()) {
+                    for (var ball2 : balls) {
                         tryCollision(ball1, ball2);
                     }
-                    tryCollision(ball1, gameBalls.playerBall());
-                    tryCollision(ball1, gameBalls.cpuBall());
+                    tryCollision(ball1, playerBall);
+                    tryCollision(ball1, cpuBall);
                 }
                 collisionBarrier.await();
             } catch (InterruptedException e) {

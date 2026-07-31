@@ -15,7 +15,7 @@ public class ThreadsBallUpdater implements BoardUpdater {
     private final GameBalls gameBalls;
     private final Boundary bounds;
     private final int nThreads;
-    private final List<CollisionAgent> collisionAgents;
+    private final List<Agent> agents;
     private final CyclicBarrier collisionBarrier;
 
     public ThreadsBallUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
@@ -23,12 +23,12 @@ public class ThreadsBallUpdater implements BoardUpdater {
         this.bounds = bounds;
         var ballAllocator = new BallAllocator(gameBalls.getAllBalls());
         this.nThreads = nThreads;
-        collisionAgents = new ArrayList<>(nThreads);
+        agents = new ArrayList<>(nThreads);
         var updateBarrier = new CyclicBarrier(nThreads);
         collisionBarrier = new CyclicBarrier(nThreads + 1);
         for (int i = 0; i < nThreads; i++) {
-            var agent = new CollisionAgent(gameBalls, ballAllocator, updateBarrier, collisionBarrier);
-            collisionAgents.add(agent);
+            var agent = new Agent(gameBalls, ballAllocator, updateBarrier, collisionBarrier);
+            agents.add(agent);
             agent.start();
         }
     }
@@ -41,7 +41,7 @@ public class ThreadsBallUpdater implements BoardUpdater {
         var splitBalls = gameBalls.splitSimpleBalls(nThreads);
 
         for (int i = 0; i < nThreads; i++) {
-            collisionAgents.get(i).notifyTask(new Task(splitBalls.get(i), bounds, elapsedTime));
+            agents.get(i).notifyTask(new Task(splitBalls.get(i), bounds, elapsedTime));
         }
 
         collisionBarrier.await();

@@ -9,9 +9,20 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 public class ViewFrame extends JFrame {
+
+    private static final Font SCORE_FONT =
+            new Font(Font.SANS_SERIF, Font.PLAIN, 80);
+    private static final Font LABEL_FONT =
+            new Font(Font.SANS_SERIF, Font.BOLD, 15);
+    private static final Font DEBUG_FONT =
+            new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+
+    private static final Stroke THIN_STROKE = new BasicStroke(1);
+    private static final Stroke BALL_STROKE = new BasicStroke(2);
 
     private final ViewModel model;
     private final GameEventListener listener;
@@ -61,14 +72,22 @@ public class ViewFrame extends JFrame {
 
     public void render() {
         if (gameEnded) return;
-        long nf = sync.nextFrameToRender();
-        panel.repaint();
+        //long nf = sync.nextFrameToRender();
+        //panel.repaint();
         checkWinner();
         try {
-            sync.waitForFrameRendered(nf);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+            SwingUtilities.invokeAndWait(() ->
+                    panel.paintImmediately(0, 0, panel.getWidth(), panel.getHeight()));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException("Rendering failed", e.getCause());
         }
+//        try {
+//            sync.waitForFrameRendered(nf);
+//        } catch (InterruptedException ex) {
+//            ex.printStackTrace();
+//        }
     }
 
     private void checkWinner() {
@@ -121,7 +140,7 @@ public class ViewFrame extends JFrame {
             Graphics2D g2 = (Graphics2D) g;
 
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 
             // Clear background
             g2.setColor(Color.WHITE);
@@ -129,7 +148,7 @@ public class ViewFrame extends JFrame {
 
             // Draw axis lines
             g2.setColor(Color.LIGHT_GRAY);
-            g2.setStroke(new BasicStroke(1));
+            g2.setStroke(THIN_STROKE);
             g2.drawLine(ox, 0, ox, oy * 2);
             g2.drawLine(0, oy, ox * 2, oy);
 
@@ -141,24 +160,24 @@ public class ViewFrame extends JFrame {
 
             // 2. DRAW POINTS
             g2.setColor(Color.BLUE);
-            g2.setFont(new Font("Arial", Font.PLAIN, 80));
+            g2.setFont(SCORE_FONT);
             g2.drawString(String.valueOf(model.getPlayerScore()), ox - (int) (delta * 0.8), oy + (int) (delta * 0.4));
             g2.drawString(String.valueOf(model.getCpuScore()), ox + (int) (delta * 0.6), oy + (int) (delta * 0.4));
 
             // 3. DRAW SMALL BALLS
             g2.setColor(Color.BLACK);
-            g2.setStroke(new BasicStroke(1));
+            g2.setStroke(THIN_STROKE);
             for (var b : model.getBalls()) {
                 drawBall(g2, b);
             }
 
             // 4. DRAW PLAYER BALLS
-            g2.setStroke(new BasicStroke(2));
+            g2.setStroke(BALL_STROKE);
             drawBallWithLabel(g2, model.getPlayerBall(), "P");
             drawBallWithLabel(g2, model.getCpuBall(), "C");
 
             // Debug Info
-            g2.setFont(new Font("Arial", Font.PLAIN, 12));
+            g2.setFont(DEBUG_FONT);
             g2.setColor(Color.BLACK);
             g2.drawString("Num small balls: " + model.getBalls().size(), 20, 150);
             g2.drawString("Frame per sec: " + String.format("%.2f", model.getFramePerSec()), 20, 170);
@@ -186,7 +205,7 @@ public class ViewFrame extends JFrame {
                 int[] coords = getBallCoords(ball);
                 g2.drawOval(coords[0], coords[1], coords[2], coords[3]);
 
-                g2.setFont(new Font("Arial", Font.BOLD, 15));
+                g2.setFont(LABEL_FONT);
                 FontMetrics fm = g2.getFontMetrics();
                 int tx = coords[0] + (coords[2] - fm.stringWidth(label)) / 2;
                 int ty = coords[1] + ((coords[3] - fm.getHeight()) / 2) + fm.getAscent();
