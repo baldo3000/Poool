@@ -40,8 +40,8 @@ public class Agent extends Thread {
                     for (var ball2 : balls) {
                         tryCollision(ball1, ball2);
                     }
-                    tryCollision(ball1, playerBall);
-                    tryCollision(ball1, cpuBall);
+                    tryCollision(playerBall, ball1);
+                    tryCollision(cpuBall, ball1);
                 }
                 collisionBarrier.await();
             } catch (InterruptedException e) {
