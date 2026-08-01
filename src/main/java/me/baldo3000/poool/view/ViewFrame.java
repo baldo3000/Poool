@@ -27,13 +27,11 @@ public class ViewFrame extends JFrame {
     private final ViewModel model;
     private final GameEventListener listener;
     private final VisualiserPanel panel;
-    private final RenderSync sync;
     private boolean gameEnded = false;
 
     public ViewFrame(ViewModel model, GameEventListener listener, int w, int h) {
         this.model = model;
         this.listener = listener;
-        this.sync = new RenderSync();
 
         setTitle("Poool");
         setSize(w, h + 25);
@@ -181,8 +179,6 @@ public class ViewFrame extends JFrame {
             g2.setColor(Color.BLACK);
             g2.drawString("Num small balls: " + model.getBalls().size(), 20, 150);
             g2.drawString("Frame per sec: " + String.format("%.2f", model.getFramePerSec()), 20, 170);
-
-            sync.notifyFrameRendered();
         }
 
         // Helper to draw the outline

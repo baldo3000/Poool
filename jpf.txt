@@ -1,7 +1,14 @@
+# Build jpf
 git clone -b java-17 git@github.com:baldo3000/jpf-core.git
 cd jpf-core
 docker compose build
 
+# Mount the project directory:
 docker-compose run --rm -v /home/andre/Documents/Poool:/Poool jpf-dev
 
-java -jar build/RunJPF.jar src/.../*.jpf
+Compile all java sources:
+javac --release 17 -d /Poool/target/classes $(find /Poool/src -name "*.java")
+
+Run scenarios:
+java -jar build/RunJPF.jar .../*.jpf
+java -jar build/RunJPF.jar /Poool/src/main/java/me/baldo3000/poool/jpf/JpfScenario.jpf

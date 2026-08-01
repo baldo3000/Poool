@@ -1,0 +1,9 @@
+target = me.baldo3000.poool.jpf.JpfScenario
+
+classpath = /Poool/target/classes
+
+listener = gov.nasa.jpf.listener.PreciseRaceDetector
+
+report.console.property_violation = error,trace
+
+search.multiple_errors = true
