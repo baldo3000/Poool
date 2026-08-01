@@ -31,10 +31,17 @@ public class Controller implements GameEventListener {
             eventBuffer.getLastPlayerDirection().ifPresent(board::applyInputToPlayer);
             eventBuffer.getLastCpuDirection().ifPresent(board::applyInputToCpu);
 
+            var startUpdate = System.currentTimeMillis();
             board.updateState(dt, boardUpdater);
+            var endUpdate = System.currentTimeMillis();
+            System.out.println( "Update time: " + (endUpdate - startUpdate));
 
             viewModel.update(board, dt);
+
+            var startRender = System.currentTimeMillis();
             view.render();
+            var endRender = System.currentTimeMillis();
+            // System.out.println( "Render time: " + (endRender - startRender));
         }
     }
 
