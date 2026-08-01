@@ -1,4 +1,4 @@
-package me.baldo3000.poool.model.boardupdate.executor;
+package me.baldo3000.poool.jpf.executor;
 
 import me.baldo3000.poool.model.Ball;
 import me.baldo3000.poool.model.boardupdate.BallAllocator;
@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class ExecutorBoardUpdater implements BoardUpdater {
+public class SafeExecutorBoardUpdater implements BoardUpdater {
 
     private final GameBalls gameBalls;
     private final Boundary bounds;
@@ -20,7 +20,7 @@ public class ExecutorBoardUpdater implements BoardUpdater {
     private final ExecutorService executor;
     private final BallAllocator ballAllocator;
 
-    public ExecutorBoardUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
+    public SafeExecutorBoardUpdater(GameBalls gameBalls, Boundary bounds, int nThreads) {
         this.gameBalls = gameBalls;
         this.bounds = bounds;
         this.ballAllocator = new BallAllocator();
@@ -102,8 +102,9 @@ public class ExecutorBoardUpdater implements BoardUpdater {
             }
         }
 
+        // The only change from the original version is skipping the contact checking before acquiring lock on pair
         private void tryCollision(Ball a, Ball b) throws InterruptedException {
-            if (a.getId() < b.getId() && Ball.isInContact(a, b)) {
+            if (a.getId() < b.getId()) {
                 ballAllocator.acquirePair(a, b);
                 try {
                     Ball.resolveCollision(a, b);

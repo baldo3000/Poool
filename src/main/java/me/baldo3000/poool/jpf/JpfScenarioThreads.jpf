@@ -1,4 +1,4 @@
-target = me.baldo3000.poool.jpf.JpfScenario
+target = me.baldo3000.poool.jpf.JpfScenarioThreads
 
 classpath = /Poool/target/classes
 

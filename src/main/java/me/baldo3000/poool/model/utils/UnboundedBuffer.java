@@ -1,13 +1,35 @@
 package me.baldo3000.poool.model.utils;
 
 import java.util.LinkedList;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class UnboundedBuffer<Item> {
 
-    private final LinkedList<Item> buffer;
+    private LinkedList<Item> buffer;
+    private int maxSize;
+
+    public UnboundedBuffer() {
+        buffer = new LinkedList<Item>();
+    }
+
+    public synchronized void put(Item item) throws InterruptedException {
+        buffer.addLast(item);
+        notifyAll();
+    }
+
+    public synchronized Item get() throws InterruptedException {
+        while (isEmpty()) {
+            wait();
+        }
+        Item item = buffer.removeFirst();
+        notifyAll();
+        return item;
+    }
+
+    private boolean isEmpty() {
+        return buffer.isEmpty();
+    }
+
+    /*private final LinkedList<Item> buffer;
     private final Lock lock;
     private final Condition notEmpty;
 
@@ -37,5 +59,5 @@ public class UnboundedBuffer<Item> {
         } finally {
             lock.unlock();
         }
-    }
+    }*/
 }

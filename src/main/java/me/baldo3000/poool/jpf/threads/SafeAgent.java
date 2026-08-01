@@ -1,19 +1,20 @@
-package me.baldo3000.poool.model.boardupdate.threads;
+package me.baldo3000.poool.jpf.threads;
 
 import me.baldo3000.poool.model.Ball;
 import me.baldo3000.poool.model.boardupdate.BallAllocator;
+import me.baldo3000.poool.model.boardupdate.threads.Task;
 import me.baldo3000.poool.model.utils.CyclicBarrier;
 import me.baldo3000.poool.model.utils.GameBalls;
 import me.baldo3000.poool.model.utils.UnboundedBuffer;
 
-public class Agent extends Thread {
+public class SafeAgent extends Thread {
     private final UnboundedBuffer<Task> taskBuffer = new UnboundedBuffer<>();
     private final GameBalls gameBalls;
     private final BallAllocator ballAllocator;
     private final CyclicBarrier collisionBarrier;
     private final CyclicBarrier updateBarrier;
 
-    public Agent(GameBalls gameBalls, BallAllocator ballAllocator, CyclicBarrier updateBarrier, CyclicBarrier collisionBarrier) {
+    public SafeAgent(GameBalls gameBalls, BallAllocator ballAllocator, CyclicBarrier updateBarrier, CyclicBarrier collisionBarrier) {
         this.gameBalls = gameBalls;
         this.ballAllocator = ballAllocator;
         this.collisionBarrier = collisionBarrier;
@@ -49,8 +50,9 @@ public class Agent extends Thread {
         }
     }
 
-    private void tryCollision(Ball a, Ball b) throws InterruptedException {
-        if (a.getId() < b.getId() && Ball.isInContact(a, b)) {
+    // The only change from the original version is skipping the contact checking before acquiring lock on pair
+    private void tryCollision(Ball a, Ball b) throws InterruptedException{
+        if (a.getId() < b.getId()) {
             ballAllocator.acquirePair(a, b);
             try {
                 Ball.resolveCollision(a, b);
@@ -68,3 +70,4 @@ public class Agent extends Thread {
         }
     }
 }
+

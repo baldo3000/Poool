@@ -4,6 +4,7 @@ import me.baldo3000.poool.controller.Controller;
 import me.baldo3000.poool.controller.CpuAgent;
 import me.baldo3000.poool.model.Board;
 import me.baldo3000.poool.model.boardupdate.executor.ExecutorBoardUpdater;
+import me.baldo3000.poool.model.boardupdate.sequential.SequentialBoardUpdater;
 import me.baldo3000.poool.model.boardupdate.threads.ThreadsBoardUpdater;
 import me.baldo3000.poool.model.config.MassiveBoardConf;
 

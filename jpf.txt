@@ -7,7 +7,7 @@ docker compose build
 docker-compose run --rm -v /home/andre/Documents/Poool:/Poool jpf-dev
 
 Compile all java sources:
-javac --release 17 -d /Poool/target/classes $(find /Poool/src -name "*.java")
+javac --release 17 -d /Poool/target/classes $(find /Poool/src -name "*.java") -cp "/Poool/lib/*"
 
 Run scenarios:
 java -jar build/RunJPF.jar .../*.jpf
