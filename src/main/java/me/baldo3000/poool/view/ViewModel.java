@@ -21,6 +21,9 @@ public class ViewModel {
     public synchronized void update(Board board, long elapsedTime) {
         frameTimes[frameCount % BUFFER_SIZE] = elapsedTime;
         frameCount++;
+        if (frameCount % BUFFER_SIZE == 0) {
+            System.out.println("FPS after " + frameCount + " frames: " + getFramePerSec());
+        }
 
         this.playerScore = board.getPlayerScore();
         this.cpuScore = board.getCpuScore();
